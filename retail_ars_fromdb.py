@@ -11,7 +11,7 @@ MYSQL_CONFIG = {
 import pandas as pd
 import pyodbc
 import numpy as np
-# import os
+import os
 from datetime import datetime, timedelta
 from scipy import stats
 import json
