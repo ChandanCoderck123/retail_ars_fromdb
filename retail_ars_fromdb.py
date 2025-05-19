@@ -46,24 +46,22 @@ CHANNELS = ['Nykaa FSN','Enrich','Purplle Retail','Tira']
 def fetch_channel_sales_data(channel):
     """Fetch sales data for a specific channel"""
     try:
-        conn = mysql.connector.connect(**MYSQL_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
+        connection = pyodbc.connect(**DB_CONFIG)
+        query = f"""
             SELECT 
-                `Date` AS date_str,
-                `Store code` AS store_id,
-                `Mat code` AS sku_id,
-                `MRP Sales` AS sales_value,
-                `Qty` AS sales_units
+                [Date] AS date_str,
+                [Store code] AS store_id,
+                [Mat code] AS sku_id,
+                [MRP Sales] AS sales_value,
+                [Qty] AS sales_units
             FROM Base
-            WHERE Platform = %s
-        """, (channel,))
-        sales_df = pd.DataFrame(cursor.fetchall())
-        cursor.close()
-        conn.close()
+            WHERE Platform = ?
+        """
+        sales_df = pd.read_sql(query, connection, params=[channel])
+        connection.close()
         print(f"Fetched {len(sales_df)} sales records for {channel}")
-                
-        # Convert dates in Python with error handling
+                # Convert dates in Python with error handling
+        
         sales_df['date'] = pd.to_datetime(
             sales_df['date_str'],
             format='%d-%m-%Y',
@@ -77,35 +75,27 @@ def fetch_channel_sales_data(channel):
             (sales_df['date'].notna()) &
             (sales_df['date'] >= nine_months_ago)
         ].copy()
-        print(f"Fetched {len(sales_df)} sales records for {channel}")
         return sales_df
     except Exception as e:
         print(f"Error fetching sales data for {channel}: {str(e)}")
         raise
 
 def fetch_channel_inventory_data(channel):
-    """Fetch inventory data for a specific channel from MySQL."""
+    """Fetch inventory data for a specific channel"""
     try:
-        conn = mysql.connector.connect(**MYSQL_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
+        connection = pyodbc.connect(**DB_CONFIG)
+        query = """
             SELECT 
-                `Store code` AS store_id,
-                `Mat code` AS sku_id,
-                `Qty` AS current_stock
-            FROM `Retail Inventory`
-            WHERE Platform = %s
-        """, (channel,))
-
-        inventory_df = pd.DataFrame(cursor.fetchall())
-
-        cursor.close()
-        conn.close()
-
+                [Store code] AS store_id,
+                [Mat code] AS sku_id,
+                [Qty] AS current_stock
+            FROM [Retail Inventory]
+            WHERE Platform = ?
+        """
+        inventory_df = pd.read_sql(query, connection, params=[channel])
+        connection.close()
         print(f"Fetched {len(inventory_df)} inventory records for {channel}")
         return inventory_df
-
     except Exception as e:
         print(f"Error fetching inventory data for {channel}: {str(e)}")
         raise
