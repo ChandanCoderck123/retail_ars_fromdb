@@ -9,7 +9,7 @@ MYSQL_CONFIG = {
 }
 
 import pandas as pd
-# import pyodbc
+import pyodbc
 import numpy as np
 # import os
 from datetime import datetime, timedelta
