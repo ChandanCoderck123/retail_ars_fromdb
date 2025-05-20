@@ -60,7 +60,6 @@ def fetch_channel_sales_data(channel):
         sales_df = pd.read_sql(query, connection, params=[channel])
         connection.close()
         print(f"Fetched {len(sales_df)} sales records for {channel}")
-                # Convert dates in Python with error handling
         
         sales_df['date'] = pd.to_datetime(
             sales_df['date_str'],
@@ -338,8 +337,8 @@ def analyze_store_sku_performance(sales_data, stock_data, plano_data):
     'week': sales_data['week'].unique()
     })
     # Fill missing weeks with zero sales
-    #sales_data = sales_data.set_index(['store_id', 'sku_id', 'week']).unstack(fill_value=0).stack().reset_index()
-    #print(unique_weeks)
+    # sales_data = sales_data.set_index(['store_id', 'sku_id', 'week']).unstack(fill_value=0).stack().reset_index()
+    # print(unique_weeks)
     try:
         insights = {}
 
@@ -354,12 +353,12 @@ def analyze_store_sku_performance(sales_data, stock_data, plano_data):
             sales_std=('sales_units', 'std')           # Standard deviation of weekly sales
         ).reset_index()
         
-        #total_weeks = sales_data['week'].nunique()
-        #print(weekly_stats['sales_std'])
+        # total_weeks = sales_data['week'].nunique()
+        # print(weekly_stats['sales_std'])
         weekly_stats['avg_weekly_sales']=weekly_stats['total_sales']/weekly_stats['total_weeks']   # Average weekly sales across all weeks
         weekly_stats['avg_weekly_revenue']=weekly_stats['total_sales_value']/weekly_stats['total_weeks']     # Average weekly revenue across all weeks
         
-        #print(weekly_std_stats)
+        # print(weekly_std_stats)
         weekly_stats=weekly_stats.round(3)
         
         weekly_stats['sales_std'] = weekly_stats['sales_std'].fillna(0)
